@@ -12,8 +12,7 @@ This notebook-based workflow provides a clear, linear learning experience with w
 
 ---
 
-
-## 📂 Project Structure
+## Project Structure
 
 ```
 project/
@@ -28,7 +27,7 @@ There is **no `models/` folder** because the LLM is executed directly through  *
 
 ---
 
-## 🧠 Pipeline Overview
+## Pipeline Overview
 
 ### **1. PDF Loading**
 
@@ -64,7 +63,7 @@ TinyLlama generates a grounded answer based purely on the provided context.
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### **1. Install dependencies**
 
@@ -84,33 +83,7 @@ ollama pull tinyllama
 
 ---
 
-## ▶️ Usage Flow (inside the notebook)
-
-### **Step 1 — Upload or load a PDF**
-
-Call the provided utility function to extract text.
-
-### **Step 2 — Split text into chunks**
-
-Adjust chunk size and overlap as needed.
-
-### **Step 3 — Build Vector DB**
-
-Embeddings + ChromaDB storage.
-
-### **Step 4 — Ask Questions**
-
-Runs retrieval + LLM reasoning.
-
-Example call:
-
-```python
-rag("What is the use of the open() function in Python?")
-```
-
----
-
-## 📘 Example Output
+## Example Output
 
 ```
 QUESTION: What is the use of the open() function? 
@@ -121,6 +94,6 @@ The open() function is used to open files and returns a file object that allows 
 
 ---
 
-## 🙋 Author
+## Author
 
 Created as an educational project to understand the core mechanics of RAG, embeddings, vector search, and local LLM reasoning.

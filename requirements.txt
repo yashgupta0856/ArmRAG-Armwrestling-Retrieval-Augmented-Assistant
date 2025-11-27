@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+chromadb==0.4.22
+sentence-transformers
+torch
+huggingface-hub
+PyPDF2
+python-multipart
+ollama

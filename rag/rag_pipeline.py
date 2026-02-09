@@ -16,7 +16,7 @@ def rag(query: str):
     context = "\n\n".join(docs)
 
     prompt = f"""
-Use ONLY the following context.
+Use ONLY the context below.
 
 CONTEXT:
 {context}
@@ -24,7 +24,7 @@ CONTEXT:
 QUESTION:
 {query}
 
-If not found, say it is not mentioned.
+If the answer is not present, say it is not mentioned.
 """
 
     answer = run_llm(prompt)

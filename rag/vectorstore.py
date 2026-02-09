@@ -1,14 +1,14 @@
 import chromadb
-from groq import Groq
 import os
+from openai import OpenAI
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 chroma_client = chromadb.Client()
 collection = chroma_client.create_collection(name="pdf_reader")
 
 def embed(text: str):
-    
-    response = client.embeddings.create(
+    response = openai_client.embeddings.create(
         model="text-embedding-3-small",
         input=text
     )

@@ -1,5 +1,6 @@
 flask
 pypdf2
 chromadb
+openai
 groq
 gunicorn

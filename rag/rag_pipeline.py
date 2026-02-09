@@ -1,22 +1,29 @@
-from rag.vectorstore import collection, embed
+from rag.vectorstore import DOCUMENTS
 from rag.llm import run_llm
 
+def keyword_retrieve(query, k=2):
+    query_words = set(query.lower().split())
+
+    scored = []
+    for text, meta in DOCUMENTS:
+        text_words = set(text.lower().split())
+        score = len(query_words & text_words)
+        if score > 0:
+            scored.append((score, text, meta))
+
+    scored.sort(reverse=True, key=lambda x: x[0])
+    return scored[:k]
+
 def rag(query: str):
-    query_emb = embed(query)
+    retrieved = keyword_retrieve(query)
 
-    results = collection.query(
-        query_embeddings=[query_emb],
-        n_results=2,
-        include=["documents", "metadatas"]
-    )
+    if not retrieved:
+        return "The answer is not mentioned in the document.", []
 
-    docs = results["documents"][0]
-    metas = results["metadatas"][0]
-
-    context = "\n\n".join(docs)
+    context = "\n\n".join([x[1] for x in retrieved])
 
     prompt = f"""
-Use ONLY the context below.
+You are a strict document-based assistant.
 
 CONTEXT:
 {context}
@@ -24,14 +31,19 @@ CONTEXT:
 QUESTION:
 {query}
 
-If the answer is not present, say it is not mentioned.
+RULES:
+- Answer ONLY from the context
+- If not found, say it is not mentioned
 """
 
     answer = run_llm(prompt)
 
     sources = [
-        {"page": m["page"], "chunk_id": m["chunk_id"]}
-        for m in metas
+        {
+            "page": meta["page"],
+            "chunk_id": meta["chunk_id"]
+        }
+        for _, _, meta in retrieved
     ]
 
     return answer, sources

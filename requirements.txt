@@ -1,7 +1,5 @@
 flask
 pypdf2
-sentence-transformers
 chromadb
-torch
 groq
 gunicorn

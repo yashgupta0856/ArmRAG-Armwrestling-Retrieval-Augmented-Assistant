@@ -1,23 +1,42 @@
 import os
 os.environ["OMP_NUM_THREADS"] = "1"
 
-from flask import Flask, request, jsonify, render_template
-from rag.loader import load_file, split_into_chunks
-from rag.vectorstore import build_store
-from rag.rag_pipeline import rag
+import streamlit as st
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain.chains import RetrievalQA
+from langchain_groq import ChatGroq
 
-app = Flask(__name__)
+# Load embedding model (still required for similarity)
+embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-pages = load_file("pdfContent/document.pdf")
-chunks, metas = split_into_chunks(pages)
-build_store(chunks, metas)
+# Load prebuilt FAISS vectors
+vectors = FAISS.load_local(
+    "vectors",
+    embeddings,
+    allow_dangerous_deserialization=True
+)
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+retriever = vectors.as_retriever(search_kwargs={"k": 2})
 
-@app.route("/ask", methods=["POST"])
-def ask():
-    q = request.form.get("question")
-    answer, sources = rag(q)
-    return jsonify({"answer": answer, "sources": sources})
+llm = ChatGroq(
+    api_key=os.getenv("GROQ_API_KEY"),
+    model="llama-3.3-70b-versatile",
+    temperature=0
+)
+
+chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=retriever,
+    chain_type="map_reduce",
+    return_source_documents=True
+)
+
+st.title("PDF RAG Assistant")
+
+query = st.text_area("Ask a question")
+
+if query:
+    with st.spinner("Thinking..."):
+        result = chain.invoke({"query": query})
+        st.write(result["result"])

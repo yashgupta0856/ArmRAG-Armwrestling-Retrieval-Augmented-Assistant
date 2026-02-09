@@ -5,7 +5,6 @@ from rag.rag_pipeline import rag
 
 app = Flask(__name__)
 
-
 pages = load_file("pdfContent/document.pdf")
 chunks, metas = split_into_chunks(pages)
 build_vectorstore(chunks, metas)
@@ -19,6 +18,3 @@ def ask():
     question = request.form.get("question")
     answer, sources = rag(question)
     return jsonify({"answer": answer, "sources": sources})
-
-if __name__ == "__main__":
-    app.run(port=5173, debug=True)

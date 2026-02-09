@@ -2,6 +2,6 @@ flask
 pypdf2
 sentence-transformers
 chromadb
-torch==2.1.0+cpu
+torch
 groq
 gunicorn

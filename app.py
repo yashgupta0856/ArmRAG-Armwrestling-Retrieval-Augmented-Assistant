@@ -1,3 +1,7 @@
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 from flask import Flask, request, jsonify, render_template
 from rag.loader import load_file, split_into_chunks
 from rag.vectorstore import build_vectorstore

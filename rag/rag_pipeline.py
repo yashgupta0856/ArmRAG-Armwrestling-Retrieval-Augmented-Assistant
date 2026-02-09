@@ -1,37 +1,38 @@
-from sentence_transformers import CrossEncoder
 from rag.vectorstore import model, collection
 from rag.llm import run_llm
 
-reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+# due to memory shortage at render platform i have to remove re-ranker 
+# from sentence_transformers import CrossEncoder
+# reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
-def rag(query):
+def rag(query: str):
+    # Embed query
     query_emb = model.encode(query).tolist()
 
     results = collection.query(
         query_embeddings=[query_emb],
-        n_results=5,
+        n_results=2,
         include=["documents", "metadatas"]
     )
 
     docs = results["documents"][0]
     metas = results["metadatas"][0]
 
-    scores = reranker.predict([(query, d) for d in docs])
-
-    ranked = sorted(zip(scores, docs, metas), reverse=True)
-    top_chunks = ranked[:2]
-
-    context = "\n\n".join([c[1] for c in top_chunks])
+    # Build context
+    context = "\n\n".join(docs)
 
     prompt = f"""
-Use ONLY this context:
+Use ONLY the following context to answer the question.
 
+CONTEXT:
 {context}
 
-Question:
+QUESTION:
 {query}
 
-If not found, say it is not mentioned.
+RULES:
+- If the answer is not in the context, say it is not mentioned.
+- Do NOT guess.
 """
 
     answer = run_llm(prompt)
@@ -39,10 +40,9 @@ If not found, say it is not mentioned.
     sources = [
         {
             "page": m["page"],
-            "chunk_id": m["chunk_id"],
-            "score": float(s)
+            "chunk_id": m["chunk_id"]
         }
-        for s, _, m in top_chunks
+        for m in metas
     ]
 
     return answer, sources

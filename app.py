@@ -1,42 +1,63 @@
-import os
-os.environ["OMP_NUM_THREADS"] = "1"
+from flask import Flask, render_template_string
 
-import streamlit as st
-from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.chains.retrieval_qa.base import RetrievalQA
-from langchain_groq import ChatGroq
+app = Flask(__name__)
 
-# Load embedding model (only for query-time similarity)
-embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+HTML = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ArmRAG Project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .box {
+            background: #020617;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 600px;
+        }
+        a {
+            color: #38bdf8;
+            font-size: 20px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            margin-bottom: 16px;
+        }
+        p {
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1> ArmRAG — Armwrestling RAG Project</h1>
+        <p>This is a lightweight landing page.</p>
+        <p>
+             <a href="https://armwrestlingrag.streamlit.app/" target="_blank">
+                Click here to open the full RAG application
+            </a>
+        </p>
+    </div>
+</body>
+</html>
+"""
 
-# Load precomputed FAISS vectors
-vectors = FAISS.load_local(
-    "vectors",
-    embeddings,
-    allow_dangerous_deserialization=True
-)
+@app.route("/")
+def home():
+    return render_template_string(HTML)
 
-retriever = vectors.as_retriever(search_kwargs={"k": 2})
-
-llm = ChatGroq(
-    api_key=os.getenv("GROQ_API_KEY"),
-    model="llama-3.3-70b-versatile",
-    temperature=0
-)
-
-chain = RetrievalQA.from_chain_type(
-    llm=llm,
-    retriever=retriever,
-    return_source_documents=True,
-    chain_type="map_reduce"
-)
-
-st.title("PDF RAG Assistant")
-
-query = st.text_area("Ask a question")
-
-if query:
-    with st.spinner("Thinking..."):
-        result = chain.invoke({"query": query})
-        st.write(result["result"])
+if __name__ == "__main__":
+    app.run()

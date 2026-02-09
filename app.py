@@ -4,13 +4,13 @@ os.environ["OMP_NUM_THREADS"] = "1"
 import streamlit as st
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.chains import RetrievalQA
+from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain_groq import ChatGroq
 
-# Load embedding model (still required for similarity)
+# Load embedding model (only for query-time similarity)
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-# Load prebuilt FAISS vectors
+# Load precomputed FAISS vectors
 vectors = FAISS.load_local(
     "vectors",
     embeddings,
@@ -28,8 +28,8 @@ llm = ChatGroq(
 chain = RetrievalQA.from_chain_type(
     llm=llm,
     retriever=retriever,
-    chain_type="map_reduce",
-    return_source_documents=True
+    return_source_documents=True,
+    chain_type="map_reduce"
 )
 
 st.title("PDF RAG Assistant")

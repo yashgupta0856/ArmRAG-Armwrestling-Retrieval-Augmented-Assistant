@@ -1,103 +1,57 @@
-# MiniRAG PDF Question-Answering System
+# Armwrestling PDF RAG Assistant
 
-A lightweight Retrieval-Augmented Generation (RAG) pipeline implemented entirely inside a  **single Jupyter notebook (`notebook.ipynb`)** , allowing users to upload any PDF and ask context-aware questions about its content. This system demonstrates the fundamentals of RAG using:
+A Retrieval-Augmented Generation (RAG) application that allows users to ask questions from a PDF document and receive **strict, source-grounded answers** using embeddings, vector search, re-ranking, and an LLM.
 
-* **Python** for preprocessing and orchestration
-* **PyPDF2** for PDF text extraction
-* **SentenceTransformers (MiniLM-L6-v2)** for semantic embeddings
-* **ChromaDB** for vector storage and similarity search
-* **Ollama (TinyLlama)** as the local LLM for answer generation
-* **Ollama (Mistral)** as the local LLM for answer generation
+---
 
-This notebook-based workflow provides a clear, linear learning experience with well-structured sections, comments, and outputs.
+## Architecture Overview
+
+PDF → Chunking → Embeddings → ChromaDB
+                             ↓
+User Question → Retrieval → Re-ranking → LLM → Answer + Sources
 
 ---
 
 ## Project Structure
 
-```
-project/
-│── notebook.ipynb            # Single consolidated notebook with the full RAG pipeline
-│── sample.pdf                # Example PDF (optional)
-│── README.md
-```
-
-**Note:**
-
-There is **no `models/` folder** because the LLM is executed directly through  **Ollama** , which manages its own model storage.
-
----
-
-## Pipeline Overview
-
-### **1. PDF Loading**
-
-Extracts raw text from uploaded documents using PyPDF2.
-
-### **2. Chunking**
-
-Splits the extracted text into overlapping segments for better retrieval quality.
-
-### **3. Embedding Generation**
-
-Converts chunks into semantic vectors using `all-MiniLM-L6-v2`.
-
-### **4. Vector Database (ChromaDB)**
-
-Stores the text chunks + embeddings and performs cosine similarity search.
-
-### **5. Query Handling**
-
-User asks a natural-language question inside the notebook.
-
-### **6. Retrieval**
-
-Chroma returns the top-n relevant text chunks.
-
-### **7. Prompt Construction**
-
-Builds a controlled prompt that restricts LLM responses to retrieved context.
-
-### **8. LLM Answering (Ollama)**
-
-TinyLlama generates a grounded answer based purely on the provided context.
+rag_app/
+│
+├── app.py
+├── rag/
+│   ├── loader.py
+│   ├── vectorstore.py
+│   ├── rag_pipeline.py
+│   └── llm.py
+├── pdfContent/
+│   └── document.pdf
+├── templates/
+│   └── index.html
+├── requirements.txt
+└── README.md
 
 ---
 
-## Installation
+## Features
 
-### **1. Install dependencies**
-
-```bash
-pip install PyPDF2 chromadb sentence-transformers
-```
-
-### **2. Install Ollama**
-
-Download: [https://ollama.com/download](https://ollama.com/download)
-
-Pull the TinyLlama model:
-
-Pull the Mistral Model:
-
-```bash
-ollama pull tinyllama
-ollama pull mistral
-```
+- PDF-based question answering
+- Semantic search with Sentence Transformers
+- Cross-Encoder re-ranking
+- ChromaDB vector store
+- Strict no-hallucination RAG prompting
+- Flask backend + HTML frontend
 
 ---
 
-## Example Output
+## Tech Stack
 
-```
-QUESTION: What is the use of the open() function? 
-
-ANSWER:
-The open() function is used to open files and returns a file object that allows reading or writing.
-```
+- Backend: Flask
+- PDF Parsing: PyPDF2
+- Embeddings: all-MiniLM-L6-v2
+- Re-ranking: cross-encoder/ms-marco-MiniLM-L-6-v2
+- Vector DB: ChromaDB
 
 ---
 
 ## Author
 
-Created as an educational project to understand the core mechanics of RAG, embeddings, vector search, and local LLM reasoning.
+Yash Gupta

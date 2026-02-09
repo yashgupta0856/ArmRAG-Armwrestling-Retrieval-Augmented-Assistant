@@ -1,0 +1,6 @@
+flask
+pypdf2
+sentence-transformers
+chromadb
+openai
+gunicorn
